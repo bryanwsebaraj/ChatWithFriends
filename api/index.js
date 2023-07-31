@@ -15,6 +15,7 @@ const jwtSecret = process.env.JWT_SECRET;
 const bcryptSalt = bcrypt.genSaltSync();
 
 const app = express();
+
 app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(express.json());
 app.use(cookieParser());
@@ -32,14 +33,13 @@ async function getUserDataFromRequest(req) {
           resolve(userData);
         });
       } else {
-        reject('no token');
+        reject('token error');
       }
     });
-  
   }
   
   app.get('/test', (req,res) => {
-    res.json('test ok');
+    res.json('valid');
   });
   
   app.get('/messages/:userId', async (req,res) => {
@@ -66,7 +66,7 @@ async function getUserDataFromRequest(req) {
         res.json(userData);
       });
     } else {
-      res.status(401).json('no token');
+      res.status(401).json('token error');
     }
   });
   
@@ -113,7 +113,6 @@ async function getUserDataFromRequest(req) {
   
   const wss = new ws.WebSocketServer({server});
   wss.on('connection', (connection, req) => {
-  
     function notifyAboutOnlinePeople() {
       [...wss.clients].forEach(client => {
         client.send(JSON.stringify({
@@ -123,7 +122,6 @@ async function getUserDataFromRequest(req) {
     }
   
     connection.isAlive = true;
-  
     connection.timer = setInterval(() => {
       connection.ping();
       connection.deathTimer = setTimeout(() => {
@@ -131,7 +129,7 @@ async function getUserDataFromRequest(req) {
         clearInterval(connection.timer);
         connection.terminate();
         notifyAboutOnlinePeople();
-        console.log('dead');
+        console.log('connection is dead');
       }, 1000);
     }, 5000);
   
@@ -139,7 +137,6 @@ async function getUserDataFromRequest(req) {
       clearTimeout(connection.deathTimer);
     });
   
-    // read username and id form the cookie for this connection
     const cookies = req.headers.cookie;
     if (cookies) {
       const tokenCookieString = cookies.split(';').find(str => str.startsWith('token='));
@@ -171,6 +168,7 @@ async function getUserDataFromRequest(req) {
           console.log('file saved:'+path);
         });
       }
+      
       if (recipient && (text || file)) {
         const messageDoc = await Message.create({
           sender:connection.userId,
@@ -178,7 +176,7 @@ async function getUserDataFromRequest(req) {
           text,
           file: file ? filename : null,
         });
-        console.log('created message');
+        console.log('message created');
         [...wss.clients]
           .filter(c => c.userId === recipient)
           .forEach(c => c.send(JSON.stringify({
@@ -191,6 +189,5 @@ async function getUserDataFromRequest(req) {
       }
     });
   
-    // notify everyone about online people (when someone connects)
     notifyAboutOnlinePeople();
   });
