@@ -10,6 +10,10 @@ Client - Uploading Image                |Client - Sending Texts
 :--------------------------------------:|:--------------------------------------:
 ![Client2](./screenshots/CWF_client-2.png)|![Client3](./screenshots/CWF_client_3.png)
 
+Log In                                  |Register
+:--------------------------------------:|:--------------------------------------:
+![Client2](./screenshots/CWF_login.png)|![Client3](./screenshots/CWF_register.png)
+
 ## To-Do
 - [ ] Add chatrooms for multiple users
 - [ ] Add functionality to request to chat before chat opens
